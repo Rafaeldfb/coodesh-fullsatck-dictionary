@@ -1,0 +1,9 @@
+#BACK-END
+back-end/node_modules/
+back-end/dist/
+back-end/.env
+
+
+#FRON-TEND
+front-end/node_modules/
+front-end/.env
