@@ -1,11 +1,10 @@
-import { User } from "@prisma/client";
 import UserModel from "../models/User";
 import SessionModel from "../models/Session";
-import { PublicUser } from "../models/UserTypes";
+import { LoginUser, PublicUser } from "../models/UserTypes";
 import bcryptAsync from "../config/bcrypt";
 import { removeUserPwdHash } from "../helpers/userHelper";
 
-export async function CreateUserController(registerData: Omit<User, "id">) : Promise<PublicUser> {
+export async function CreateUserController(registerData: LoginUser) : Promise<PublicUser> {
   const { email, password} = registerData;
   
   if (!email?.length) {
@@ -26,7 +25,7 @@ export async function CreateUserController(registerData: Omit<User, "id">) : Pro
   try {
     const newUser = await UserModel.createUser({
       ...registerData,
-      password: hashedPwd
+      passwordHash: hashedPwd
     })
       .then((user) => removeUserPwdHash(user));
 

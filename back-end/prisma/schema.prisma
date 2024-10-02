@@ -18,7 +18,7 @@ model User {
   firstName String
   lastName String?
   email String @unique
-  password String // passwords are stored as hash
+  passwordHash String // passwordHashs are stored as hash
   session Session?
 }
 
