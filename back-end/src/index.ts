@@ -12,9 +12,9 @@ app.use(express.json());
 
 // BASE route handlers
 app.get('/', (req, res) => {
-  res.send(
-    'Hello from server',
-  )
+  res.send({
+    "message": "Fullstack Challenge 🏅 - Dictionary",
+  })
 });
 
 
