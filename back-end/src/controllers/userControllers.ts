@@ -1,10 +1,11 @@
 import UserModel from "../models/User";
 import SessionModel from "../models/Session";
-import { LoginUser, PublicUser } from "../models/UserTypes";
+import { PublicUser } from "../models/UserTypes";
+import { RegisterPayload } from "../models/SessionTypes"
 import bcryptAsync from "../config/bcrypt";
 import { removeUserPwdHash } from "../helpers/userHelper";
 
-export async function CreateUserController(registerData: LoginUser) : Promise<PublicUser> {
+export async function CreateUserController(registerData: RegisterPayload) : Promise<PublicUser> {
   const { email, password} = registerData;
   
   if (!email?.length) {
@@ -75,10 +76,10 @@ export async function DeleteUserController(id: string) : Promise<string> {
 
     if (!user) throw new Error("Fail to remove user - User not found");
     
-    const activeSession = SessionModel.getSession(id)
+    const activeSession = SessionModel.getSession({ loggerId: id })
       .then((session) => {
         if (session) {
-          return SessionModel.setSession(session.loggerId, false)
+          return SessionModel.setSession({loggerId: session.loggerId}, false)
         }
         return null;
       })

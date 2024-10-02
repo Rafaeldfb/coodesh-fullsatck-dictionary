@@ -1,16 +1,19 @@
 import prisma from '../config/prisma';
 import { Session } from '@prisma/client';
 import bcryptAsync from '../config/bcrypt';
+import { SessionCredentials } from './SessionTypes';
 
 export default class SessionModel {
-  static async getSession(userId?: string, sessionId?: string): Promise<Session | null> {
-    if (!userId && !sessionId) {
+  static async getSession(credentials: SessionCredentials): Promise<Session | null> {
+    const { loggerId, token } = credentials;
+
+    if (!loggerId && !token) {
       throw new Error("Invalid session parameters");
     };
 
-    const filter = userId?.length 
-      ? {loggerId: userId} 
-      : {id: sessionId};
+    const filter = loggerId?.length 
+      ? {loggerId: loggerId} 
+      : {id: token};
     
     try {
       const session = await prisma.session.findUnique({
@@ -26,13 +29,17 @@ export default class SessionModel {
     return null;
   }
 
-  static async setSession(userId: string, state: boolean) : Promise<Session> {
+  static async setSession(credentials: SessionCredentials, state: boolean) : Promise<Session> {
+    const { loggerId } = credentials;
     let session: Session;
 
-    if (state) { // creates a new session
+    // State true means to create a new session.
+    if (state && loggerId) { // creates a new session
       const newSession: Omit<Session, "id" | "createdAt" > = {
-        loggerId: userId,
-        token: await bcryptAsync.hash(userId)
+        loggerId,
+        token: await bcryptAsync.hash(
+          `${Date.now()}&${loggerId}`
+        )
       };
 
       try {
@@ -48,7 +55,7 @@ export default class SessionModel {
     // Remove active session
     try {
       session =  await prisma.session.delete({
-        where: { loggerId: userId },
+        where: { ...credentials },
       });
 
     } catch (error) {
