@@ -1,8 +1,7 @@
 import prisma from '../config/prisma';
-import { User, Session } from '@prisma/client';
-import bcryptAsync from '../config/bcrypt';
+import { User } from '@prisma/client';
 
-export class UserModel {
+export default class UserModel {
   static async createUser(data: Omit<User, 'id'>): Promise<User> {
     const newUser = await prisma.user.create({
       data: data
@@ -11,11 +10,7 @@ export class UserModel {
     return newUser
   };
 
-  static async getUser(user: Partial<User>): Promise<User> {
-    const { email, id } = user;
-
-    if (id?.length) return this.getUserById(id);
-
+  static async getUserByEmail(email: string): Promise<User> {
     try {
       const userByEmail = await prisma.user.findUnique({
         where: { email }
@@ -37,64 +32,24 @@ export class UserModel {
 
       if (user) return user;
       throw new Error("User not found");
+
     } catch (error) {
       throw new Error("User not found");
     }
   }
 
-  static async deleteUser(id: string) : Promise<string | null> {
+  static async deleteUser(id: string) : Promise<string> {
     try {
-      const user = await this.getUserById(id);
-
-      if (!Object.keys(user)) return null;
-
       const deletedUser = await prisma.user.delete({
         where: { id: id },
         select: { id: true },
       })
 
-      if (deletedUser?.id) {
-        await this.setSession(deletedUser.id, false)
-        
-        return deletedUser?.id
-      }
-
-      return  null;
+      if (deletedUser?.id) return deletedUser?.id;
+      throw new Error("Fail to delete user");
 
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error("Fail to delete user");
     }
-  }
-
-  static async setSession(userId: string, state: boolean) : Promise<Session | null> {
-    if (state) { // creates a new session
-      const newSession: Omit<Session, "id" | "createdAt" > = {
-        loggerId: userId,
-        token: await bcryptAsync.hash(userId)
-      };
-
-      try {
-        const session = await prisma.session.create({
-          data: newSession
-        });
-  
-        return session;
-
-      } catch (error) {
-        throw new Error(`DB.setSession - Could not create session \nReason: ${error.message}`);  
-      }
-    };
-
-    // Remove active session
-    try {
-      await prisma.session.delete({
-        where: { loggerId: userId },
-      });
-
-    } catch (error) {
-      throw new Error(`DB.setSession - Could not remove session \nReason: ${error.message}`);
-    }
-    
-    return null;
   }
 }

@@ -1,9 +1,11 @@
 import { User } from "@prisma/client";
-import { UserModel } from "../models/User";
+import UserModel from "../models/User";
+import SessionModel from "../models/Session";
+import { PublicUser } from "../models/UserTypes";
 import bcryptAsync from "../config/bcrypt";
+import { removeUserPwdHash } from "../helpers/userHelper";
 
-
-export async function createUserController(registerData: Omit<User, "id">) : Promise<User> {
+export async function CreateUserController(registerData: Omit<User, "id">) : Promise<PublicUser> {
   const { email, password} = registerData;
   
   if (!email?.length) {
@@ -13,7 +15,7 @@ export async function createUserController(registerData: Omit<User, "id">) : Pro
     throw new Error("Could not add user - Invalid password");
   }
 
-  const user = await UserModel.getUser({ email });
+  const user = await UserModel.getUserByEmail(email);
 
   if (user) {
     throw new Error("Could not add user - Email already registered");
@@ -25,7 +27,8 @@ export async function createUserController(registerData: Omit<User, "id">) : Pro
     const newUser = await UserModel.createUser({
       ...registerData,
       password: hashedPwd
-    });
+    })
+      .then((user) => removeUserPwdHash(user));
 
     if (newUser) return newUser;
     throw new Error("Could not add user - fail to register user");
@@ -35,22 +38,64 @@ export async function createUserController(registerData: Omit<User, "id">) : Pro
   }
 };
 
-export function getUser() {
+export async function GetUserByIdController(id: string): Promise<PublicUser> {
+  try {
+    const user = await UserModel.getUserById(id)
+    .then((user) => removeUserPwdHash(user));
+    
+    if (user) return user;
+    throw new Error("User not found");
 
+  } catch (error) {
+    throw new Error(`Fail to get user - reason: ${error?.message}`);
+  }
 };
 
-export function deleteUser() {
+export async function GetUserController(id?: string, email?: string) : Promise<PublicUser> {
+  if (id?.length) return GetUserByIdController(id);
 
+  else if (email?.length) {
+    try {
+      const user = await UserModel.getUserByEmail(email)
+        .then((user) => removeUserPwdHash(user));
+      
+      if (user) return user;
+      throw new Error("User not found");
+
+    } catch (error) {
+      throw new Error(`Fail to get user - reason: ${error?.message}`);
+    }
+  };
+
+  throw new Error(`Invalid user identifiers`);
 };
 
-export function loginUser() {
+export async function DeleteUserController(id: string) : Promise<string> {
+  try {
+    const user = await UserModel.getUserById(id);
 
+    if (!user) throw new Error("Fail to remove user - User not found");
+    
+    const activeSession = SessionModel.getSession(id)
+      .then((session) => {
+        if (session) {
+          return SessionModel.setSession(session.loggerId, false)
+        }
+        return null;
+      })
+      .catch((error) => {
+        throw new Error(`Session error \nReason: ${error.message}`); 
+      });
+
+    const [, deletedUserId] = await Promise.all([
+      activeSession, 
+      UserModel.deleteUser(id)
+    ])
+
+    return deletedUserId;
+
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
-export function logoutUser() {
-
-};
-
-export function sessionUser() {
-
-};
