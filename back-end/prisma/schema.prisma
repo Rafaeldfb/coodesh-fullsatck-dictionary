@@ -15,18 +15,9 @@ datasource db {
 
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  firstName String
+  name String
   lastName String?
   email String @unique
   passwordHash String // passwordHashs are stored as hash
-  session Session?
 }
 
-// Custom Session solution - 
-model Session {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  logger User @relation(fields: [loggerId], references: [id] )
-  loggerId String @db.ObjectId @unique
-  token String @unique
-  createdAt DateTime @default(now())
-}
