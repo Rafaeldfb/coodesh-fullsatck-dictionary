@@ -3,7 +3,6 @@ import authMiddleware from '../middleware/auth';
 import { LoginController, LogoutController, RefreshSessionToken } from '../controllers/authController';
 import { CreateUserController } from '../controllers/userControllers';
 import { RequestJwt } from '../@types/express';
-import { LoginPayload, RegisterPayload } from '../models/SessionTypes';
 import { AuthResponse } from '../@types/http';
 
 const router = Router();
@@ -39,7 +38,9 @@ router.post('/signout', async (req: Request, res: Response) => {
   res.status(200).json(signout);
 });
 
-router.get('/refresh', 
+// When the user's access token is expired, 
+// Client will hot this route to refresh the token.
+router.post('/refresh', 
   (req: RequestJwt, res: Response, next: NextFunction) => {
     // refresh tokens sent to controller;
     req.tokenRefresh = req.headers['authorization']?.split(' ')[1];

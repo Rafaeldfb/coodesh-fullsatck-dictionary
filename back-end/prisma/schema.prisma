@@ -13,6 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// USER
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
@@ -21,3 +22,17 @@ model User {
   passwordHash String // passwordHashs are stored as hash
 }
 
+// WORD ENTRIES
+model WordEntry {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  word String @unique
+  entryData Json
+}
+
+model WordsList {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  word String @unique
+}
+
+// USERS WORDS - FAVS / SAW
+// @TODO

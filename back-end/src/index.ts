@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import express from 'express';
+
 import userRoutes from './routes/userRoutes';
+import entriesRoutes from './routes/entriesRoutes';
+import userProfileRoutes from './routes/userProfileRoutes';
 
 dotenv.config();
 
@@ -18,7 +21,13 @@ app.get('/', (req, res) => {
 });
 
 // AUTH
-app.use('/auth', userRoutes)
+app.use('/auth', userRoutes);
+
+// Words entries routes
+app.use('/entries', entriesRoutes);
+
+// User' Profile routes
+app.use('/user', userProfileRoutes);
 
 
 app.listen(PORT, () => {
