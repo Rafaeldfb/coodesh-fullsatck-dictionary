@@ -9,8 +9,8 @@ front-end/node_modules/
 front-end/.env
 
 # dependencies
-front-end//node_modules
-front-end//.pnp
+front-end/node_modules
+front-end/.pnp
 front-end/.pnp.js
 front-end/.yarn/install-state.gz
 
