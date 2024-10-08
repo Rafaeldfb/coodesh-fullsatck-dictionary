@@ -5,7 +5,7 @@ export default class UserModel {
   static async createUser(data: Omit<User, 'id'>): Promise<User> {
     const newUser = await prisma.user.create({
       data: data
-    })
+    });
     
     return newUser
   };

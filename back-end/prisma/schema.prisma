@@ -13,20 +13,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// USER
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  firstName String
+  name String
   lastName String?
   email String @unique
   passwordHash String // passwordHashs are stored as hash
-  session Session?
 }
 
-// Custom Session solution - 
-model Session {
+// WORD ENTRIES
+model WordEntry {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  logger User @relation(fields: [loggerId], references: [id] )
-  loggerId String @db.ObjectId @unique
-  token String @unique
-  createdAt DateTime @default(now())
+  word String @unique
+  entryData Json
 }
+
+model WordsList {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  word String @unique
+}
+
+// USERS WORDS - FAVS / SAW
+// @TODO

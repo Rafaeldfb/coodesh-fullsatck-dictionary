@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import express from 'express';
+
 import userRoutes from './routes/userRoutes';
+import entriesRoutes from './routes/entriesRoutes';
+import userProfileRoutes from './routes/userProfileRoutes';
 
 dotenv.config();
 
@@ -17,9 +20,15 @@ app.get('/', (req, res) => {
   })
 });
 
+// AUTH
+app.use('/auth', userRoutes);
 
-// API's routes
-app.use('/api', userRoutes);
+// Words entries routes
+app.use('/entries', entriesRoutes);
+
+// User' Profile routes
+app.use('/user', userProfileRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`)
