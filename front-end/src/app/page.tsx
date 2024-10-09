@@ -1,16 +1,22 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useContext } from 'react';
+import { GlobalContext } from '@/context/GlobalContext';
+
+export default function App() {
+  const globalContext = useContext(GlobalContext);
+
+  const {testResponse} = globalContext 
+
   return (
-    <div 
-      className={`
-        grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 
-        sm:p-20 font-[family-name:var(--font-geist-sans)]
-      `}
-    >
-      <main>
+    <main className="text-center">
+      <div>
         Hello from Full Stack Dicitionary!
-      </main>
-    </div>
+      </div>
+
+      <div className="respose-test">
+        {JSON.stringify(testResponse)}
+      </div>
+    </main>
   );
 }
