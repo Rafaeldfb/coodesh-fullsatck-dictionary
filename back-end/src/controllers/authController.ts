@@ -1,5 +1,4 @@
 import UserModel from "../models/User";
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { LoginPayload } from "../models/SessionTypes"; 
 import { Request, Response } from "express";
@@ -8,6 +7,8 @@ import bcryptAsync from "../config/bcrypt";
 import JwtService from "../services/jwtServices";
 import { TokenUserData } from "../@types/jwt";
 import { RequestJwt } from "../@types/express";
+import { PublicUser } from "../models/UserTypes";
+import UserService from "../services/userServices";
 
 dotenv.config();
 
@@ -73,8 +74,25 @@ export async function RefreshSessionToken(req: RequestJwt, res: Response): Promi
     token: newTokens.accessToken.token,
     refreshToken: newTokens.refreshToken.token
   } as AuthResponse;
-}
+};
 
-// Old method from sessionControllers had a method called
-// GetUsersSession(credentials: SessionCredentials) : Promise<Session | null>
-// Should I do the same for jwt?
+export async function authUserController(req: RequestJwt, res: Response): Promise<PublicUser> {
+  let accessToken = req.headers?.authorization;
+  
+  if (!accessToken) throw new Error('invalid access token');
+  
+  accessToken = accessToken.split(' ')[1];
+
+  const validatedUserTokenData = JwtService.verifyToken(accessToken, 'access');
+
+  if (!validatedUserTokenData || !validatedUserTokenData?.email) {
+    throw new Error('invalid token data')
+  };
+
+  const user = await UserService.getPublicUserDataByEmail(validatedUserTokenData.email)
+    .catch(err => {
+      throw new Error(err?.message);
+    })
+
+  return user;
+}

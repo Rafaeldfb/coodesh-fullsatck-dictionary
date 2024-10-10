@@ -4,9 +4,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
-
-
 export default class JwtService {
   static createAccessToken(credentials: TokenUserData): AccessToken {
     const accessToken = jwt.sign(

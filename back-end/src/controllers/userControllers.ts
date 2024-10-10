@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import UserModel from "../models/User";
-import { CreateUserService} from "../services/userServices";
+import UserService from "../services/userServices";
 import { PublicUser } from "../models/UserTypes";
 import { RegisterPayload } from "../models/SessionTypes"
 import { removeUserPwdHash } from "../helpers/userHelper";
@@ -9,7 +9,7 @@ import { AuthResponse } from "../@types/http";
 export async function CreateUserController(req: Request, res: Response) : Promise<AuthResponse> {
   const registerPayload = req.body as RegisterPayload;
 
-  const response = await CreateUserService(registerPayload)
+  const response = await UserService.createUserService(registerPayload)
     .catch(err => {
       throw new Error(`Could not add user - ${err.message}`);
     });
